@@ -1,28 +1,513 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>OCR Tool</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OCR Tool</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #1a73e8;
+      --blue-dark: #1558b0;
+      --green: #34a853;
+      --red: #ea4335;
+      --bg: #f8f9fc;
+      --card: #ffffff;
+      --border: #e0e4ef;
+      --text: #1e2133;
+      --muted: #6b7280;
+      --radius: 14px;
+      --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--blue);
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(26,115,232,0.3);
+    }
+    header svg { flex-shrink: 0; }
+    header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+    header p { font-size: 0.82rem; opacity: 0.85; margin-top: 2px; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
+
+    /* Upload card */
+    .upload-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 2px dashed var(--border);
+      padding: 40px 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-card.drag-over {
+      border-color: var(--blue);
+      background: #e8f0fe;
+    }
+    .upload-card input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 3rem; margin-bottom: 12px; }
+    .upload-card h2 { font-size: 1.1rem; color: var(--text); margin-bottom: 6px; }
+    .upload-card p { font-size: 0.85rem; color: var(--muted); }
+    .upload-card .btn-primary {
+      display: inline-block; margin-top: 16px;
+      background: var(--blue); color: #fff;
+      padding: 10px 24px; border-radius: 8px; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; border: none; transition: background 0.2s;
+    }
+    .upload-card .btn-primary:hover { background: var(--blue-dark); }
+
+    /* Paste hint */
+    .paste-hint {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .paste-hint kbd {
+      background: #eef0f5;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.78rem;
+      font-family: monospace;
+    }
+
+    /* Preview grid */
+    #preview-section { margin-top: 24px; display: none; }
+    #preview-section h3 { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
+    #preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+    .preview-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      aspect-ratio: 1;
+      background: #f1f3f9;
+    }
+    .preview-item img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .preview-item .remove-btn {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(234,67,53,0.9); color: #fff;
+      border: none; border-radius: 50%; width: 22px; height: 22px;
+      font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .preview-item .filename {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.5); color: #fff;
+      font-size: 0.65rem; padding: 3px 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Actions */
+    .actions { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      padding: 11px 22px; border-radius: 9px; font-size: 0.9rem;
+      font-weight: 600; border: none; cursor: pointer; transition: all 0.18s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .btn-run { background: var(--blue); color: #fff; }
+    .btn-run:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-run:disabled { background: #a8c4f0; cursor: not-allowed; transform: none; }
+    .btn-clear { background: #fff; color: var(--muted); border: 1.5px solid var(--border); }
+    .btn-clear:hover { background: #fef2f2; color: var(--red); border-color: var(--red); }
+
+    /* Loading */
+    #loading {
+      display: none; text-align: center; padding: 32px;
+      color: var(--blue); font-weight: 600; font-size: 0.95rem;
+    }
+    .spinner {
+      display: inline-block; width: 28px; height: 28px;
+      border: 3px solid #cce0ff; border-top-color: var(--blue);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-bottom: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Results */
+    #results-section { margin-top: 28px; }
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+    }
+    .results-header h2 { font-size: 1.05rem; font-weight: 700; }
+    .download-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-dl {
+      padding: 8px 14px; border-radius: 8px; font-size: 0.8rem;
+      font-weight: 600; border: 1.5px solid var(--border);
+      background: #fff; color: var(--text); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-dl:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .result-block {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .result-block-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px;
+      background: #f4f7fe;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 8px;
+    }
+    .result-block-header .file-name {
+      font-weight: 700; font-size: 0.92rem; color: var(--blue);
+    }
+    .stats {
+      display: flex; gap: 14px;
+    }
+    .stat {
+      font-size: 0.8rem; color: var(--muted);
+      background: #e8f0fe; padding: 3px 10px; border-radius: 20px;
+    }
+    .stat span { font-weight: 700; color: var(--blue); }
+
+    .result-textarea-wrap { position: relative; }
+    textarea.ocr-text {
+      width: 100%; min-height: 140px; padding: 16px 18px;
+      border: none; outline: none; resize: vertical;
+      font-size: 0.92rem; line-height: 1.65;
+      font-family: 'Segoe UI', sans-serif; color: var(--text);
+      background: #fff;
+    }
+    .copy-btn {
+      position: absolute; top: 10px; right: 12px;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: 7px; padding: 6px 14px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: var(--blue-dark); }
+    .copy-btn.copied { background: var(--green); }
+
+    .no-text-msg {
+      padding: 20px 18px; color: var(--muted); font-style: italic; font-size: 0.9rem;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
+      background: #1e2133; color: #fff; padding: 11px 22px;
+      border-radius: 10px; font-size: 0.88rem; font-weight: 500;
+      opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 600px) {
+      header { padding: 14px 16px; }
+      .container { padding: 16px 12px; }
+      .upload-card { padding: 28px 14px; }
+      .download-group { justify-content: flex-start; }
+    }
+  </style>
 </head>
 <body>
 
-<h1>OCR Tool</h1>
+<header>
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <rect width="36" height="36" rx="10" fill="rgba(255,255,255,0.2)"/>
+    <path d="M10 9h16M10 13h10M10 17h12M10 23l4-4 3 3 5-6 4 5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div>
+    <h1>OCR Tool</h1>
+    <p>Extract text from images instantly</p>
+  </div>
+</header>
 
-<form action="/ocr" method="POST" enctype="multipart/form-data">
+<div class="container">
 
-<input
-type="file"
-name="image"
-accept="image/*"
-capture="environment"
-required>
+  <!-- Upload Area -->
+  <div class="upload-card" id="drop-zone">
+    <input type="file" id="file-input" accept="image/*" multiple capture="environment" />
+    <div class="upload-icon">🖼️</div>
+    <h2>Drop images here or click to upload</h2>
+    <p>Supports PNG, JPG, JPEG, GIF, BMP, WEBP, TIFF</p>
+    <button class="btn-primary" type="button" onclick="document.getElementById('file-input').click()">
+      Choose Images
+    </button>
+    <div class="paste-hint">📋 Or paste an image with <kbd>Ctrl</kbd>+<kbd>V</kbd></div>
+  </div>
 
-<br><br>
+  <!-- Preview -->
+  <div id="preview-section">
+    <h3 id="preview-count">0 image(s) selected</h3>
+    <div id="preview-grid"></div>
+  </div>
 
-<button type="submit">
-Upload & OCR
-</button>
+  <!-- Action Buttons -->
+  <div class="actions" id="action-buttons" style="display:none">
+    <button class="btn btn-run" id="run-btn" onclick="runOCR()">
+      <span>🔍</span> Extract Text
+    </button>
+    <button class="btn btn-clear" onclick="clearAll()">
+      <span>✕</span> Clear All
+    </button>
+  </div>
 
-</form>
+  <!-- Loading -->
+  <div id="loading">
+    <div class="spinner"></div><br>
+    Processing image(s)…
+  </div>
 
+  <!-- Results -->
+  <div id="results-section" style="display:none">
+    <div class="results-header">
+      <h2>📄 Results</h2>
+      <div class="download-group">
+        <button class="btn-dl" onclick="downloadFile('txt')">⬇ TXT</button>
+        <button class="btn-dl" onclick="downloadFile('docx')">⬇ DOCX</button>
+        <button class="btn-dl" onclick="downloadFile('pdf')">⬇ PDF</button>
+        <button class="btn-dl" onclick="downloadFile('json')">⬇ JSON</button>
+      </div>
+    </div>
+    <div id="results-list"></div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+  let selectedFiles = [];
+  let ocrResults = [];
+
+  // ── File input change ──────────────────────────────────────
+  document.getElementById('file-input').addEventListener('change', function () {
+    addFiles(Array.from(this.files));
+    this.value = '';
+  });
+
+  // ── Drag & Drop ────────────────────────────────────────────
+  const dropZone = document.getElementById('drop-zone');
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    addFiles(files);
+  });
+
+  // ── Paste (Ctrl+V) ─────────────────────────────────────────
+  document.addEventListener('paste', e => {
+    const items = Array.from(e.clipboardData.items || []);
+    const imageItems = items.filter(i => i.type.startsWith('image/'));
+    if (!imageItems.length) return;
+    const files = imageItems.map(item => {
+      const blob = item.getAsFile();
+      return new File([blob], `pasted_${Date.now()}.png`, { type: blob.type });
+    });
+    addFiles(files);
+    showToast('📋 Image pasted!');
+  });
+
+  // ── Add files to state ─────────────────────────────────────
+  function addFiles(files) {
+    const ALLOWED = ['image/png','image/jpeg','image/gif','image/bmp','image/webp','image/tiff'];
+    const valid = files.filter(f => ALLOWED.includes(f.type));
+    selectedFiles = [...selectedFiles, ...valid];
+    renderPreviews();
+  }
+
+  function renderPreviews() {
+    const section = document.getElementById('preview-section');
+    const grid = document.getElementById('preview-grid');
+    const count = document.getElementById('preview-count');
+    const actions = document.getElementById('action-buttons');
+
+    if (!selectedFiles.length) {
+      section.style.display = 'none';
+      actions.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    actions.style.display = 'flex';
+    count.textContent = `${selectedFiles.length} image(s) selected`;
+    grid.innerHTML = '';
+
+    selectedFiles.forEach((file, idx) => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.innerHTML = '×';
+      removeBtn.onclick = () => { selectedFiles.splice(idx, 1); renderPreviews(); };
+
+      const name = document.createElement('div');
+      name.className = 'filename';
+      name.textContent = file.name;
+
+      div.appendChild(img);
+      div.appendChild(removeBtn);
+      div.appendChild(name);
+      grid.appendChild(div);
+    });
+  }
+
+  // ── Run OCR ────────────────────────────────────────────────
+  async function runOCR() {
+    if (!selectedFiles.length) return;
+
+    const runBtn = document.getElementById('run-btn');
+    runBtn.disabled = true;
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+
+    const formData = new FormData();
+    selectedFiles.forEach(f => formData.append('images', f));
+
+    try {
+      const res = await fetch('/ocr', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.error) { showToast('❌ ' + data.error); return; }
+      ocrResults = data.results;
+      renderResults();
+    } catch (err) {
+      showToast('❌ Network error. Is Flask running?');
+    } finally {
+      runBtn.disabled = false;
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  // ── Render Results ─────────────────────────────────────────
+  function renderResults() {
+    const section = document.getElementById('results-section');
+    const list = document.getElementById('results-list');
+    section.style.display = 'block';
+    list.innerHTML = '';
+
+    ocrResults.forEach((r, idx) => {
+      const block = document.createElement('div');
+      block.className = 'result-block';
+
+      block.innerHTML = `
+        <div class="result-block-header">
+          <span class="file-name">📄 ${escHtml(r.filename)}</span>
+          <div class="stats">
+            <div class="stat">Words: <span>${r.word_count}</span></div>
+            <div class="stat">Chars: <span>${r.char_count}</span></div>
+          </div>
+        </div>
+        <div class="result-textarea-wrap">
+          ${r.text
+            ? `<textarea class="ocr-text" id="text-${idx}">${escHtml(r.text)}</textarea>
+               <button class="copy-btn" id="copy-${idx}" onclick="copyText(${idx})">Copy</button>`
+            : `<div class="no-text-msg">⚠️ No text detected in this image.</div>`
+          }
+        </div>`;
+
+      list.appendChild(block);
+    });
+
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Copy text ──────────────────────────────────────────────
+  function copyText(idx) {
+    const ta = document.getElementById(`text-${idx}`);
+    navigator.clipboard.writeText(ta.value).then(() => {
+      const btn = document.getElementById(`copy-${idx}`);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Downloads ──────────────────────────────────────────────
+  async function downloadFile(type) {
+    if (!ocrResults.length) { showToast('Run OCR first!'); return; }
+
+    // Merge all texts for TXT
+    const combinedText = ocrResults.map(r =>
+      `=== ${r.filename} ===\nWords: ${r.word_count} | Chars: ${r.char_count}\n\n${r.text}`
+    ).join('\n\n---\n\n');
+
+    const body = type === 'txt'
+      ? { text: combinedText }
+      : { results: ocrResults };
+
+    try {
+      const res = await fetch(`/download/${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) { const e = await res.json(); showToast('❌ ' + (e.error || 'Download failed')); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ocr_result.${type}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`✅ Downloaded as .${type.toUpperCase()}`);
+    } catch (err) {
+      showToast('❌ Download error');
+    }
+  }
+
+  // ── Clear All ──────────────────────────────────────────────
+  function clearAll() {
+    selectedFiles = [];
+    ocrResults = [];
+    renderPreviews();
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('loading').style.display = 'none';
+  }
+
+  // ── Helpers ────────────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
 </body>
 </html>

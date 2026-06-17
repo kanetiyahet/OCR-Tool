@@ -1,0 +1,4 @@
+flask
+easyocr
+python-docx
+reportlab
