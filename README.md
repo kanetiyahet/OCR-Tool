@@ -44,7 +44,7 @@ A Flask-based OCR Tool that works on both Laptop and Mobile.
 - German
 - Spanish
 
-## Installation
+## Installation (WINDOW)
 
 ### 1. Clone Repository
 
@@ -108,6 +108,124 @@ Server will start:
 ```text
 http://127.0.0.1:5000
 ```
+
+## Linux Installation (Ubuntu/Kali/Debian)
+
+### 1. Install Python
+
+```bash
+sudo apt update
+sudo apt install python3 python3-pip python3-venv git -y
+```
+
+### 2. Clone Repository
+
+```bash
+git clone https://github.com/kanetiyahet/OCR-Tool.git
+cd OCR-Tool
+```
+
+### 3. Create Virtual Environment
+
+```bash
+python3 -m venv venv
+```
+
+### 4. Activate Virtual Environment
+
+```bash
+source venv/bin/activate
+```
+
+### 5. Install Requirements
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 6. Create .env File
+
+```env
+SARVAM_API_KEY=your_sarvam_key
+GEMINI_API_KEY=your_gemini_key
+OPENAI_API_KEY=your_openai_key
+```
+
+### 7. Run Application
+
+```bash
+python app.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
+
+## macOS Installation
+
+### 1. Install Homebrew (if not installed)
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### 2. Install Python & Git
+
+```bash
+brew install python git
+```
+
+### 3. Clone Repository
+
+```bash
+git clone https://github.com/kanetiyahet/OCR-Tool.git
+cd OCR-Tool
+```
+
+### 4. Create Virtual Environment
+
+```bash
+python3 -m venv venv
+```
+
+### 5. Activate Virtual Environment
+
+```bash
+source venv/bin/activate
+```
+
+### 6. Install Requirements
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 7. Create .env File
+
+```env
+SARVAM_API_KEY=your_sarvam_key
+GEMINI_API_KEY=your_gemini_key
+OPENAI_API_KEY=your_openai_key
+```
+
+### 8. Run Application
+
+```bash
+python app.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
+```
+
 
 ## Mobile Access
 
