@@ -63,7 +63,7 @@ py -m venv venv
 venv\Scripts\Activate
 ```
 
-If PowerShell blocks activation:
+If  blocks activation(powershell):
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
