@@ -2,6 +2,10 @@
 
 A Flask-based OCR Tool that works on both Laptop and Mobile.
 
+
+<img width="1915" height="907" alt="image" src="https://github.com/user-attachments/assets/8adb55db-a0ec-4683-b4d7-a1d548547ea4" />
+
+
 ## Features
 
 - EasyOCR (Offline OCR)
