@@ -332,7 +332,7 @@
     <div>
       <label for="provider">OCR Provider</label>
       <select id="provider" name="provider">
-        <option value="easyocr">EasyOCR (Free)</option>
+        <option value="easyocr">OFFLINE</option>
         <option value="sarvam">Sarvam AI</option>
         <option value="gemini">Gemini Vision</option>
         <option value="openai">OpenAI Vision</option>
@@ -494,7 +494,7 @@
       sel.innerHTML = '';
       const autoOpt = document.createElement('option');
       autoOpt.value = 'auto';
-      autoOpt.textContent = '⚡ Auto (English)';
+      autoOpt.textContent = ' Auto ';
       sel.appendChild(autoOpt);
       Object.entries(langs).forEach(([code, name]) => {
         const opt = document.createElement('option');
