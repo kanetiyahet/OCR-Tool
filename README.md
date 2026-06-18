@@ -57,10 +57,10 @@ py -m venv venv
 
 ### 3. Activate Virtual Environment
 
-Windows PowerShell:
 
-```powershell
-.\venv\Scripts\Activate.ps1
+
+```cmd
+venv\Scripts\Activate
 ```
 
 If PowerShell blocks activation:
