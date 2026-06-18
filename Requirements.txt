@@ -2,3 +2,8 @@ flask
 easyocr
 python-docx
 reportlab
+python-dotenv
+google-generativeai
+openai
+sarvamai
+pillow
