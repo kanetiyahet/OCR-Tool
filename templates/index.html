@@ -43,14 +43,37 @@
 
     .container { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
 
-    /* Upload card */
+    .settings {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px 24px;
+    }
+    .settings label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .settings select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      font-size: 0.9rem;
+      min-width: 150px;
+    }
+
     .upload-card {
       background: var(--card);
       border-radius: var(--radius);
       border: 2px dashed var(--border);
       padding: 40px 28px;
       text-align: center;
-      cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
       position: relative;
     }
@@ -58,21 +81,30 @@
       border-color: var(--blue);
       background: #e8f0fe;
     }
-    .upload-card input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-    }
     .upload-icon { font-size: 3rem; margin-bottom: 12px; }
     .upload-card h2 { font-size: 1.1rem; color: var(--text); margin-bottom: 6px; }
     .upload-card p { font-size: 0.85rem; color: var(--muted); }
-    .upload-card .btn-primary {
-      display: inline-block; margin-top: 16px;
-      background: var(--blue); color: #fff;
-      padding: 10px 24px; border-radius: 8px; font-size: 0.9rem;
-      font-weight: 600; cursor: pointer; border: none; transition: background 0.2s;
-    }
-    .upload-card .btn-primary:hover { background: var(--blue-dark); }
 
-    /* Paste hint */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--blue-dark); }
+
     .paste-hint {
       margin-top: 12px;
       font-size: 0.8rem;
@@ -91,7 +123,56 @@
       font-family: monospace;
     }
 
-    /* Preview grid */
+    /* ---- Camera Modal ---- */
+    .camera-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .camera-overlay.active { display: flex; }
+    .camera-box {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 20px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .camera-box video {
+      width: 100%;
+      max-height: 70vh;
+      background: #000;
+      border-radius: 8px;
+      display: block;
+    }
+    .camera-box .camera-actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .camera-box .camera-actions button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-capture { background: var(--green); color: #fff; }
+    .btn-capture:hover { background: #2d9249; }
+    .btn-close-camera { background: var(--red); color: #fff; }
+    .btn-close-camera:hover { background: #c62828; }
+
+    /* ---- Preview grid (unchanged) ---- */
     #preview-section { margin-top: 24px; display: none; }
     #preview-section h3 { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
     #preview-grid {
@@ -124,7 +205,6 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* Actions */
     .actions { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
     .btn {
       padding: 11px 22px; border-radius: 9px; font-size: 0.9rem;
@@ -137,7 +217,6 @@
     .btn-clear { background: #fff; color: var(--muted); border: 1.5px solid var(--border); }
     .btn-clear:hover { background: #fef2f2; color: var(--red); border-color: var(--red); }
 
-    /* Loading */
     #loading {
       display: none; text-align: center; padding: 32px;
       color: var(--blue); font-weight: 600; font-size: 0.95rem;
@@ -150,7 +229,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Results */
     #results-section { margin-top: 28px; }
     .results-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -215,7 +293,6 @@
       padding: 20px 18px; color: var(--muted); font-style: italic; font-size: 0.9rem;
     }
 
-    /* Toast */
     #toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(40px);
       background: #1e2133; color: #fff; padding: 11px 22px;
@@ -229,6 +306,9 @@
       .container { padding: 16px 12px; }
       .upload-card { padding: 28px 14px; }
       .download-group { justify-content: flex-start; }
+      .settings { flex-direction: column; align-items: stretch; }
+      .btn-group { flex-direction: column; align-items: center; }
+      .btn-primary { width: 100%; max-width: 280px; }
     }
   </style>
 </head>
@@ -247,15 +327,41 @@
 
 <div class="container">
 
+  <!-- Settings -->
+  <div class="settings">
+    <div>
+      <label for="provider">OCR Provider</label>
+      <select id="provider" name="provider">
+        <option value="easyocr">EasyOCR (Free)</option>
+        <option value="sarvam">Sarvam AI</option>
+        <option value="gemini">Gemini Vision</option>
+        <option value="openai">OpenAI Vision</option>
+      </select>
+    </div>
+    <div>
+      <label for="language">Language</label>
+      <select id="language" name="language">
+        <!-- populated by JavaScript -->
+      </select>
+    </div>
+  </div>
+
   <!-- Upload Area -->
   <div class="upload-card" id="drop-zone">
-    <input type="file" id="file-input" accept="image/*" multiple capture="environment" />
     <div class="upload-icon">🖼️</div>
-    <h2>Drop images here or click to upload</h2>
+    <h2>Drop images here or tap to upload</h2>
     <p>Supports PNG, JPG, JPEG, GIF, BMP, WEBP, TIFF</p>
-    <button class="btn-primary" type="button" onclick="document.getElementById('file-input').click()">
-      Choose Images
-    </button>
+
+    <div class="btn-group">
+      <button class="btn-primary" id="camera-btn">📷 Take Photo</button>
+      <button class="btn-primary" onclick="document.getElementById('gallery-input').click()">🖼️ Choose from Gallery</button>
+    </div>
+
+    <!-- Hidden inputs -->
+    <input type="file" id="gallery-input" accept="image/*" multiple style="display:none;">
+    <!-- Fallback camera input (native) -->
+    <input type="file" id="camera-fallback-input" accept="image/*" capture="environment" multiple style="display:none;">
+
     <div class="paste-hint">📋 Or paste an image with <kbd>Ctrl</kbd>+<kbd>V</kbd></div>
   </div>
 
@@ -297,21 +403,113 @@
 
 </div>
 
+<!-- Camera Modal (for getUserMedia) -->
+<div class="camera-overlay" id="camera-overlay">
+  <div class="camera-box">
+    <video id="video" autoplay playsinline></video>
+    <div class="camera-actions">
+      <button class="btn-capture" id="capture-btn">📸 Capture</button>
+      <button class="btn-close-camera" id="close-camera-btn">✕ Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
   let selectedFiles = [];
   let ocrResults = [];
 
-  // ── File input change ──────────────────────────────────────
-  document.getElementById('file-input').addEventListener('change', function () {
-    addFiles(Array.from(this.files));
-    this.value = '';
+  // ── Camera handling (hybrid) ────────────────────────────
+  const cameraOverlay = document.getElementById('camera-overlay');
+  const video = document.getElementById('video');
+  let stream = null;
+
+  document.getElementById('camera-btn').addEventListener('click', openCamera);
+
+  async function openCamera() {
+    try {
+      // Try getUserMedia first
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      video.srcObject = stream;
+      cameraOverlay.classList.add('active');
+    } catch (err) {
+      // Fallback to native camera input
+      showToast('📷 Camera access denied. Using native camera fallback.');
+      document.getElementById('camera-fallback-input').click();
+    }
+  }
+
+  // Close camera modal
+  document.getElementById('close-camera-btn').addEventListener('click', closeCamera);
+  function closeCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    video.srcObject = null;
+    cameraOverlay.classList.remove('active');
+  }
+
+  // Capture from getUserMedia
+  document.getElementById('capture-btn').addEventListener('click', captureImage);
+  function captureImage() {
+    if (!stream) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(function(blob) {
+      const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      addFiles([file]);
+      closeCamera();
+      showToast('📸 Photo captured!');
+    }, 'image/jpeg', 0.95);
+  }
+
+  // ── Native camera fallback handler ──────────────────────
+  document.getElementById('camera-fallback-input').addEventListener('change', function () {
+    if (this.files.length) {
+      addFiles(Array.from(this.files));
+      this.value = '';
+      showToast('📸 Image(s) captured!');
+    }
   });
 
-  // ── Drag & Drop ────────────────────────────────────────────
-  const dropZone = document.getElementById('drop-zone');
+  // ── Gallery handler ──────────────────────────────────────
+  document.getElementById('gallery-input').addEventListener('change', function () {
+    if (this.files.length) {
+      addFiles(Array.from(this.files));
+      this.value = '';
+    }
+  });
 
+  // ── Load languages ─────────────────────────────────────
+  async function loadLanguages() {
+    try {
+      const res = await fetch('/languages');
+      const langs = await res.json();
+      const sel = document.getElementById('language');
+      sel.innerHTML = '';
+      const autoOpt = document.createElement('option');
+      autoOpt.value = 'auto';
+      autoOpt.textContent = '⚡ Auto (English)';
+      sel.appendChild(autoOpt);
+      Object.entries(langs).forEach(([code, name]) => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+      sel.value = 'auto';
+    } catch (e) {
+      console.warn('Could not load languages:', e);
+    }
+  }
+
+  // ── Drag & Drop ──────────────────────────────────────────
+  const dropZone = document.getElementById('drop-zone');
   dropZone.addEventListener('dragover', e => {
     e.preventDefault();
     dropZone.classList.add('drag-over');
@@ -324,7 +522,7 @@
     addFiles(files);
   });
 
-  // ── Paste (Ctrl+V) ─────────────────────────────────────────
+  // ── Paste ────────────────────────────────────────────────
   document.addEventListener('paste', e => {
     const items = Array.from(e.clipboardData.items || []);
     const imageItems = items.filter(i => i.type.startsWith('image/'));
@@ -337,7 +535,6 @@
     showToast('📋 Image pasted!');
   });
 
-  // ── Add files to state ─────────────────────────────────────
   function addFiles(files) {
     const ALLOWED = ['image/png','image/jpeg','image/gif','image/bmp','image/webp','image/tiff'];
     const valid = files.filter(f => ALLOWED.includes(f.type));
@@ -384,7 +581,7 @@
     });
   }
 
-  // ── Run OCR ────────────────────────────────────────────────
+  // ── Run OCR ──────────────────────────────────────────────
   async function runOCR() {
     if (!selectedFiles.length) return;
 
@@ -394,6 +591,8 @@
     document.getElementById('results-section').style.display = 'none';
 
     const formData = new FormData();
+    formData.append('provider', document.getElementById('provider').value);
+    formData.append('language', document.getElementById('language').value);
     selectedFiles.forEach(f => formData.append('images', f));
 
     try {
@@ -410,7 +609,7 @@
     }
   }
 
-  // ── Render Results ─────────────────────────────────────────
+  // ── Render Results ────────────────────────────────────────
   function renderResults() {
     const section = document.getElementById('results-section');
     const list = document.getElementById('results-list');
@@ -435,7 +634,8 @@
                <button class="copy-btn" id="copy-${idx}" onclick="copyText(${idx})">Copy</button>`
             : `<div class="no-text-msg">⚠️ No text detected in this image.</div>`
           }
-        </div>`;
+        </div>
+      `;
 
       list.appendChild(block);
     });
@@ -443,7 +643,7 @@
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── Copy text ──────────────────────────────────────────────
+  // ── Copy text ────────────────────────────────────────────
   function copyText(idx) {
     const ta = document.getElementById(`text-${idx}`);
     navigator.clipboard.writeText(ta.value).then(() => {
@@ -454,11 +654,10 @@
     });
   }
 
-  // ── Downloads ──────────────────────────────────────────────
+  // ── Downloads ────────────────────────────────────────────
   async function downloadFile(type) {
     if (!ocrResults.length) { showToast('Run OCR first!'); return; }
 
-    // Merge all texts for TXT
     const combinedText = ocrResults.map(r =>
       `=== ${r.filename} ===\nWords: ${r.word_count} | Chars: ${r.char_count}\n\n${r.text}`
     ).join('\n\n---\n\n');
@@ -487,7 +686,7 @@
     }
   }
 
-  // ── Clear All ──────────────────────────────────────────────
+  // ── Clear All ────────────────────────────────────────────
   function clearAll() {
     selectedFiles = [];
     ocrResults = [];
@@ -496,7 +695,7 @@
     document.getElementById('loading').style.display = 'none';
   }
 
-  // ── Helpers ────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────
   function escHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -508,6 +707,9 @@
     clearTimeout(t._timer);
     t._timer = setTimeout(() => t.classList.remove('show'), 2800);
   }
+
+  // Initial load
+  document.addEventListener('DOMContentLoaded', loadLanguages);
 </script>
 </body>
 </html>
